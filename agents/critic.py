@@ -6,7 +6,7 @@ import time
 class Critic:
     """Critic (Value) Model."""
 
-    def __init__(self, state_size, action_size,hidden_size=32):
+    def __init__(self, state_size, action_size,hidden_size=64):
         """Initialize parameters and build model.
 
         Params
@@ -31,16 +31,22 @@ class Critic:
         with tf.variable_scope(scope):
             with tf.variable_scope("state"):
                 net_states = slim.fully_connected(inp_state,self.num_hidden,scope='fc1') # (N,num_hidden)
-                #net_states = slim.fully_connected(net_states,self.num_hidden,scope='fc2') # (N,num_hidden)
+                net_states = slim.batch_norm(net_states)
+                net_states = slim.fully_connected(net_states,self.num_hidden,scope='fc2') # (N,num_hidden)
+                net_states = slim.batch_norm(net_states)
             
             with tf.variable_scope("action"):
                 net_actions = slim.fully_connected(actions,self.num_hidden,scope='fc1') # (N,num_hidden)
-                #net_actions = slim.fully_connected(net_actions,self.num_hidden,scope='fc2') # (N,num_hidden)
+                net_actions = slim.batch_norm(net_actions)
+                net_actions = slim.fully_connected(net_actions,self.num_hidden,scope='fc2') # (N,num_hidden)
+                net_actions = slim.batch_norm(net_actions)
             
             with tf.name_scope("combined"):
                 net = tf.add(net_states,net_actions)
                 net = slim.fully_connected(net,self.num_hidden,scope='fc1_combined') # (N,num_hidden)
+                net = slim.batch_norm(net)
                 net = slim.fully_connected(net,self.num_hidden,scope='fc2_combined') # (N,num_hidden)
+                net = slim.batch_norm(net)
                 net = slim.fully_connected(net,1,activation_fn=None,scope='net')
             
             with tf.name_scope("action_gradient"):

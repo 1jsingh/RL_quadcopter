@@ -147,6 +147,8 @@ class DDPG():
                 while True:
                     action = self.act(sess,self.last_state)
                     next_state,reward,done = self.task.step(action)
+                    # if reward > 3:
+                    #     print (eps_count,episode_step)
                     #print (step,self.last_state,action,next_state)
                     self.step(sess,action, reward, next_state, done)
                     total_reward += reward

@@ -36,7 +36,9 @@ class Actor:
     def model(self,inp_state,scope='actor_model'):
         with tf.variable_scope(scope):
             net = slim.fully_connected(inp_state,self.num_hidden,scope='fc1') # (N,num_hidden)
+            net = slim.batch_norm(net)
             net = slim.fully_connected(net,self.num_hidden,scope='fc2') # (N,num_hidden)
+            net = slim.batch_norm(net)
             net = slim.fully_connected(net,self.action_size,activation_fn=tf.sigmoid,scope='fc3') # (N,action_size)
             net = tf.multiply(net,self.action_range) + self.action_low # map from [0,1] to action ranges
         return net
@@ -46,7 +48,7 @@ class Actor:
             actor_loss = tf.reduce_mean(-actions*action_gradients)
         return actor_loss
              
-    def optimizer(self,loss,learning_rate=1e-3):
+    def optimizer(self,loss,learning_rate=1e-4):
         with tf.name_scope('actor_optimizer'):
             train_op = tf.train.AdamOptimizer(learning_rate).minimize(loss)
         return train_op
