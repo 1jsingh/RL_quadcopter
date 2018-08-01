@@ -7,7 +7,7 @@ import time
 class Actor:
     """Actor (Policy) Model."""
 
-    def __init__(self, state_size, action_size, action_low, action_high,hidden_size=64):
+    def __init__(self, state_size, action_size, action_low, action_high,single_rotor_control = False,hidden_size=64):
         """Initialize parameters for the actor.
 
         Params
@@ -18,6 +18,8 @@ class Actor:
             action_high (array): Max value of each action dimension
         """
         self.state_size = state_size
+        self.single_rotor_control = single_rotor_control
+        
         self.action_size = action_size
         self.action_low = action_low
         self.action_high = action_high
@@ -36,10 +38,15 @@ class Actor:
     def model(self,inp_state,scope='actor_model'):
         with tf.variable_scope(scope):
             net = slim.fully_connected(inp_state,self.num_hidden,scope='fc1') # (N,num_hidden)
-            net = slim.batch_norm(net)
+            #net = slim.batch_norm(net)
             net = slim.fully_connected(net,self.num_hidden,scope='fc2') # (N,num_hidden)
-            net = slim.batch_norm(net)
-            net = slim.fully_connected(net,self.action_size,activation_fn=tf.sigmoid,scope='fc3') # (N,action_size)
+            #net = slim.batch_norm(net)
+            if self.single_rotor_control:
+                net = slim.fully_connected(net,1,activation_fn=tf.sigmoid,scope='fc3') # (N,1)
+                mask = tf.ones([1,self.action_size])
+                net = tf.multiply(net,mask) #(N,action_size)
+            else:
+                net = slim.fully_connected(net,self.action_size,activation_fn=tf.sigmoid,scope='fc3') # (N,action_size)
             net = tf.multiply(net,self.action_range) + self.action_low # map from [0,1] to action ranges
         return net
         

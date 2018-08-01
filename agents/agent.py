@@ -11,7 +11,7 @@ from agents.utils import *
 
 class DDPG():
     """Reinforcement Learning agent that learns using DDPG."""
-    def __init__(self, task):
+    def __init__(self, task, single_rotor_control = False):
         tf.reset_default_graph()
         
         self.task = task
@@ -21,11 +21,11 @@ class DDPG():
         self.action_high = self.task.action_high
         
         with tf.variable_scope("local"):
-            self.actor_local = Actor(self.state_size, self.action_size, self.action_low, self.action_high)
+            self.actor_local = Actor(self.state_size, self.action_size, self.action_low, self.action_high , single_rotor_control)
             self.critic_local = Critic(self.state_size, self.action_size)
         
         with tf.variable_scope("target"):
-            self.actor_target = Actor(self.state_size, self.action_size, self.action_low, self.action_high)
+            self.actor_target = Actor(self.state_size, self.action_size, self.action_low, self.action_high ,single_rotor_control)
             self.critic_target = Critic(self.state_size, self.action_size)
             
         
@@ -45,8 +45,8 @@ class DDPG():
             
         # Noise process
         self.exploration_mu = 0
-        self.exploration_theta = .15 #(self.action_high - self.action_low)*.05
-        self.exploration_sigma = .20 #(self.action_high - self.action_low)*.05
+        self.exploration_theta = 1.5 #(self.action_high - self.action_low)*.05
+        self.exploration_sigma = 2 #(self.action_high - self.action_low)*.05
         self.noise = OUNoise(self.action_size, self.exploration_mu, self.exploration_theta, self.exploration_sigma)
 
         # Replay memory
@@ -80,7 +80,7 @@ class DDPG():
         state = np.reshape(state, [-1, self.state_size])
         action = sess.run(self.actor_local.actions,feed_dict={self.actor_local.inp_state:state})
         #return list(action + self.noise.sample())  # add some noise for exploration
-        return np.clip((action[0] + self.noise.sample()),self.action_low,self.action_high)
+        return np.clip((action[0] + self.noise.sample()[0]),self.action_low,self.action_high)
         
     def learn(self, sess,experiences):
         """Update policy and value parameters using given batch of experience tuples."""
@@ -112,7 +112,7 @@ class DDPG():
         sess.run(self.actor_target.opt,feed_dict={self.actor_target.inp_state:states,
                                                   self.actor_target.action_gradients:action_gradients})
         # Soft-update target models
-        sess.run(self.target_update_ops,feed_dict={self.tau:0.001})   
+        sess.run(self.target_update_ops,feed_dict={self.tau:0.01})   
 
     def soft_update(self):
         local_list = slim.get_variables_to_restore(include=["local"])
@@ -122,45 +122,3 @@ class DDPG():
             update_op = tf.assign(local_list[i],(1-self.tau)*local_list[i] + (self.tau)*target_list[i])
             update_ops.append(update_op)
         return update_ops
-    
-    def train(self,max_num_episodes=10000):
-        
-        # getting timestamp
-        timestamp = str(int(time.time()))
-
-        # log_path for tensorboard
-        LOGS_PATH = "./tensorboard/"+timestamp
-        
-        with tf.Session() as sess:
-            sess.run(tf.global_variables_initializer())
-            
-            # create log writer object
-            train_writer = tf.summary.FileWriter(LOGS_PATH+'/train',sess.graph)
-            
-            # Set same weights for target and local models
-            sess.run(self.target_update_ops,feed_dict={self.tau:1.0})
-            DISPLAY_STEP = 100
-            max_reward = -10000
-            for eps_count in range(max_num_episodes):
-                self.reset()
-                total_reward,episode_step = 0,0
-                while True:
-                    action = self.act(sess,self.last_state)
-                    next_state,reward,done = self.task.step(action)
-                    # if reward > 3:
-                    #     print (eps_count,episode_step)
-                    #print (step,self.last_state,action,next_state)
-                    self.step(sess,action, reward, next_state, done)
-                    # if eps_count+1 == max_num_episodes:
-                    #     print (action, reward, next_state, done)
-                    total_reward += reward
-                    episode_step += 1
-                    
-                    if done or episode_step == 200:
-                        max_reward = max(max_reward,total_reward)
-                        if eps_count % DISPLAY_STEP == 0:
-                            print ("episode : {} ... total reward :{} ... max reward :{} ... eps_length : {}".format(eps_count,
-                                                                                                 total_reward,max_reward,episode_step))
-                        summary = sess.run(self.summary_op,feed_dict={self.reward_log:total_reward,self.eps_length_log:episode_step})
-                        train_writer.add_summary(summary, eps_count)
-                        break

@@ -19,10 +19,10 @@ class Task():
         self.action_repeat = 3
 
         self.state_size = self.action_repeat * 6
-        self.action_low = 450
+        self.action_low = 0
         self.action_high = 900
         self.action_size = 4
-
+        self.t = 0
         # Goal
         self.target_pos = target_pos if target_pos is not None else np.array([0., 0., 10.]) 
 
@@ -31,7 +31,7 @@ class Task():
         penalty = 0
         if done and self.t < 240:
             penalty = -10
-        reward = penalty + 1 - .001*(np.square(self.sim.pose[:3] - self.target_pos)).sum() #- .001*(np.square(self.sim.pose[3:])).sum()
+        reward = 1 - .005*(abs(self.sim.pose[:3] - self.target_pos)).sum() #- .001*(np.square(self.sim.pose[3:])).sum()
                     #- .005*(abs(self.sim.v)).sum() 
                      #   - .005*(abs(self.sim.pose[3:])).sum()
                     #- \
