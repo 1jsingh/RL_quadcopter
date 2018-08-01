@@ -19,7 +19,7 @@ class Task():
         self.action_repeat = 3
 
         self.state_size = self.action_repeat * 6
-        self.action_low = 0
+        self.action_low = 450
         self.action_high = 900
         self.action_size = 4
 
@@ -28,8 +28,10 @@ class Task():
 
     def get_reward(self,done):
         """Uses current pose of sim to return reward."""
-        isdone = int(done)
-        reward = np.tanh(1. -.003*(abs(self.sim.pose[:3] - self.target_pos)).sum())
+        penalty = 0
+        if done and self.t < 240:
+            penalty = -10
+        reward = penalty + 1 - .001*(np.square(self.sim.pose[:3] - self.target_pos)).sum() #- .001*(np.square(self.sim.pose[3:])).sum()
                     #- .005*(abs(self.sim.v)).sum() 
                      #   - .005*(abs(self.sim.pose[3:])).sum()
                     #- \
@@ -41,6 +43,7 @@ class Task():
         reward = 0
         pose_all = []
         for _ in range(self.action_repeat):
+            self.t += 1
             done = self.sim.next_timestep(rotor_speeds) # update the sim pose and velocities
             reward += self.get_reward(done) 
             pose_all.append(self.sim.pose)
@@ -49,6 +52,7 @@ class Task():
 
     def reset(self):
         """Reset the sim to start a new episode."""
+        self.t = 0
         self.sim.reset()
         state = np.concatenate([self.sim.pose] * self.action_repeat) 
         return state

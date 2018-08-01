@@ -137,9 +137,11 @@ class PhysicsSim():
             if position[ii] <= self.lower_bounds[ii]:
                 new_positions.append(self.lower_bounds[ii])
                 self.done = True
+                #print ("hit lower bound" , self.lower_bounds[ii])
             elif position[ii] > self.upper_bounds[ii]:
                 new_positions.append(self.upper_bounds[ii])
                 self.done = True
+                #print ("hit upper bound" , self.upper_bounds[ii])
             else:
                 new_positions.append(position[ii])
 

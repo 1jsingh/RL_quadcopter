@@ -45,8 +45,8 @@ class DDPG():
             
         # Noise process
         self.exploration_mu = 0
-        self.exploration_theta = 1.5 #(self.action_high - self.action_low)*.05
-        self.exploration_sigma = 2.0 #(self.action_high - self.action_low)*.05
+        self.exploration_theta = .15 #(self.action_high - self.action_low)*.05
+        self.exploration_sigma = .20 #(self.action_high - self.action_low)*.05
         self.noise = OUNoise(self.action_size, self.exploration_mu, self.exploration_theta, self.exploration_sigma)
 
         # Replay memory
@@ -112,7 +112,7 @@ class DDPG():
         sess.run(self.actor_target.opt,feed_dict={self.actor_target.inp_state:states,
                                                   self.actor_target.action_gradients:action_gradients})
         # Soft-update target models
-        sess.run(self.target_update_ops,feed_dict={self.tau:0.01})   
+        sess.run(self.target_update_ops,feed_dict={self.tau:0.001})   
 
     def soft_update(self):
         local_list = slim.get_variables_to_restore(include=["local"])
@@ -151,6 +151,8 @@ class DDPG():
                     #     print (eps_count,episode_step)
                     #print (step,self.last_state,action,next_state)
                     self.step(sess,action, reward, next_state, done)
+                    # if eps_count+1 == max_num_episodes:
+                    #     print (action, reward, next_state, done)
                     total_reward += reward
                     episode_step += 1
                     
