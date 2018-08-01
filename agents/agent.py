@@ -112,7 +112,7 @@ class DDPG():
         sess.run(self.actor_target.opt,feed_dict={self.actor_target.inp_state:states,
                                                   self.actor_target.action_gradients:action_gradients})
         # Soft-update target models
-        sess.run(self.target_update_ops,feed_dict={self.tau:0.01})   
+        sess.run(self.target_update_ops,feed_dict={self.tau:0.001})   
 
     def soft_update(self):
         local_list = slim.get_variables_to_restore(include=["local"])
