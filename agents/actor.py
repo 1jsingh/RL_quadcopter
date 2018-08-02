@@ -46,13 +46,16 @@ class Actor:
             #net = slim.batch_norm(net,is_training=self.is_training)
             net = slim.fully_connected(net,self.num_hidden,#normalizer_fn=slim.batch_norm,normalizer_params = batch_norm_params,
                                 weights_regularizer=slim.l2_regularizer(1e-3),scope='fc2') # (N,num_hidden)
+
+            net = slim.fully_connected(net,self.num_hidden,normalizer_fn=slim.batch_norm,normalizer_params = batch_norm_params,
+                               weights_regularizer=slim.l2_regularizer(1e-3),scope='fc3') # (N,num_hidden)
             #net = slim.batch_norm(net,is_training=self.is_training)
             if self.single_rotor_control:
-                net = slim.fully_connected(net,1,activation_fn=tf.sigmoid,scope='fc3') # (N,1)
+                net = slim.fully_connected(net,1,activation_fn=tf.sigmoid,scope='fc4') # (N,1)
                 mask = tf.ones([1,self.action_size])
                 net = tf.multiply(net,mask) #(N,action_size)
             else:
-                net = slim.fully_connected(net,self.action_size,activation_fn=tf.sigmoid,scope='fc3') # (N,action_size)
+                net = slim.fully_connected(net,self.action_size,activation_fn=tf.sigmoid,scope='fc4') # (N,action_size)
             net = tf.multiply(net,self.action_range) + self.action_low # map from [0,1] to action ranges
         return net
         
@@ -63,7 +66,11 @@ class Actor:
              
     def optimizer(self,loss,learning_rate=1e-4):
         with tf.name_scope('actor_optimizer'):
-            train_op = tf.train.AdamOptimizer(learning_rate).minimize(loss)
+            #train_op = tf.train.AdamOptimizer(learning_rate)#.minimize(loss)
+            optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+            gradients, variables = zip(*optimizer.compute_gradients(loss))
+            gradients, _ = tf.clip_by_global_norm(gradients, 1.0)
+            train_op = optimizer.apply_gradients(zip(gradients, variables))
         return train_op
     
     def build_model(self):

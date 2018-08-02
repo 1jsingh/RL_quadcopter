@@ -83,7 +83,7 @@ class DDPG():
         state = np.reshape(state, [-1, self.state_size])
         action = sess.run(self.actor_local.actions,feed_dict={self.actor_local.inp_state:state})
         #return list(action + self.noise.sample())  # add some noise for exploration
-        return np.clip((action[0] + self.noise.sample()[0]),self.action_low,self.action_high)
+        return np.clip((action[0] + self.noise.sample()),self.action_low,self.action_high)
         
     def learn(self, sess,experiences):
         """Update policy and value parameters using given batch of experience tuples."""
