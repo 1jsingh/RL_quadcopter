@@ -55,7 +55,7 @@ class Actor:
             actor_loss = tf.reduce_mean(-actions*action_gradients)
         return actor_loss
              
-    def optimizer(self,loss,learning_rate=1e-3):
+    def optimizer(self,loss,learning_rate=1e-4):
         with tf.name_scope('actor_optimizer'):
             train_op = tf.train.AdamOptimizer(learning_rate).minimize(loss)
         return train_op

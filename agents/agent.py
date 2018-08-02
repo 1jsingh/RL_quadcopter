@@ -45,8 +45,8 @@ class DDPG():
             
         # Noise process
         self.exploration_mu = 0
-        self.exploration_theta = 1.5 #(self.action_high - self.action_low)*.05
-        self.exploration_sigma = 2 #(self.action_high - self.action_low)*.05
+        self.exploration_theta = 3 #(self.action_high - self.action_low)*.05
+        self.exploration_sigma = 4 #(self.action_high - self.action_low)*.05
         self.noise = OUNoise(self.action_size, self.exploration_mu, self.exploration_theta, self.exploration_sigma)
 
         # Replay memory

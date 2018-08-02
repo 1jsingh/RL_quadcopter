@@ -59,7 +59,7 @@ class Critic:
             critic_loss = tf.reduce_mean(tf.square(qtarget-q_pred))
         return critic_loss
              
-    def optimizer(self,loss,learning_rate=1e-2):
+    def optimizer(self,loss,learning_rate=1e-3):
         with tf.name_scope('critic_optimizer'):
             train_op = tf.train.AdamOptimizer(learning_rate).minimize(loss)
         return train_op
