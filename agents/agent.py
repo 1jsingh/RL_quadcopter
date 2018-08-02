@@ -19,10 +19,11 @@ class DDPG():
         self.action_size = self.task.action_size
         self.action_low = self.task.action_low
         self.action_high = self.task.action_high
-        
+        self.action_range = self.action_high - self.action_low
+
         with tf.variable_scope("local"):
-            self.actor_local = Actor(self.state_size, self.action_size, self.action_low, self.action_high , single_rotor_control)
-            self.critic_local = Critic(self.state_size, self.action_size)
+            self.actor_local = Actor(self.state_size, self.action_size, self.action_low, self.action_high , single_rotor_control,is_training=False)
+            self.critic_local = Critic(self.state_size, self.action_size,is_training=False)
         
         with tf.variable_scope("target"):
             self.actor_target = Actor(self.state_size, self.action_size, self.action_low, self.action_high ,single_rotor_control)
@@ -45,12 +46,12 @@ class DDPG():
             
         # Noise process
         self.exploration_mu = 0
-        self.exploration_theta = 3 #(self.action_high - self.action_low)*.05
-        self.exploration_sigma = 4 #(self.action_high - self.action_low)*.05
+        self.exploration_theta = .015 #(self.action_high - self.action_low)*.05
+        self.exploration_sigma = .02 #(self.action_high - self.action_low)*.05
         self.noise = OUNoise(self.action_size, self.exploration_mu, self.exploration_theta, self.exploration_sigma)
 
         # Replay memory
-        self.buffer_size = 100000
+        self.buffer_size = 10000
         self.batch_size = 64
         self.memory = ReplayBuffer(self.buffer_size,self.batch_size)
 
@@ -60,10 +61,12 @@ class DDPG():
     def reset(self):
         self.noise.reset()
         state = self.task.reset()
-        self.last_state = state
+        self.last_state = state/100.
         return state
 
     def step(self, sess,action, reward, next_state, done):
+        
+        next_state = next_state/100.
         # Save experience / reward
         self.memory.add(self.last_state, action, reward, next_state, done)
 
@@ -80,7 +83,7 @@ class DDPG():
         state = np.reshape(state, [-1, self.state_size])
         action = sess.run(self.actor_local.actions,feed_dict={self.actor_local.inp_state:state})
         #return list(action + self.noise.sample())  # add some noise for exploration
-        return np.clip((action[0] + self.noise.sample()[0]),self.action_low,self.action_high)
+        return np.clip((action[0] + self.noise.sample()[0]),0,1)
         
     def learn(self, sess,experiences):
         """Update policy and value parameters using given batch of experience tuples."""
