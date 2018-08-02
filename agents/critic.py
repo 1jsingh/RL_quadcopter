@@ -34,24 +34,20 @@ class Critic:
             with tf.variable_scope("state"):
                 net_states = slim.fully_connected(inp_state,self.num_hidden,
                             normalizer_fn=slim.batch_norm,normalizer_params = batch_norm_params,scope='fc1') # (N,num_hidden)
-                #net_states = slim.batch_norm(net_states,is_training = self.is_training)
-                #net_states = slim.fully_connected(net_states,self.num_hidden,scope='fc2') # (N,num_hidden)
-                #net_states = slim.batch_norm(net_states,is_training = self.is_training)
+                net_states = slim.fully_connected(inp_state,self.num_hidden,
+                            normalizer_fn=slim.batch_norm,normalizer_params = batch_norm_params,scope='fc3') # (N,num_hidden)
+                
             
             with tf.variable_scope("action"):
                 net_actions = slim.fully_connected(actions,self.num_hidden,normalizer_fn=slim.batch_norm,
                                             normalizer_params = batch_norm_params,scope='fc1') # (N,num_hidden)
-                #net_actions = slim.batch_norm(net_actions,is_training = self.is_training)
-                #net_actions = slim.fully_connected(net_actions,self.num_hidden,scope='fc2') # (N,num_hidden)
-                #net_actions = slim.batch_norm(net_actions,is_training = self.is_training)
+                net_actions = slim.fully_connected(actions,self.num_hidden,normalizer_fn=slim.batch_norm,
+                                            normalizer_params = batch_norm_params,scope='fc2') # (N,num_hidden)
             
             with tf.name_scope("combined"):
                 net = tf.add(net_states,net_actions)
                 net = slim.fully_connected(net,self.num_hidden,normalizer_fn=slim.batch_norm,normalizer_params = batch_norm_params,
                                                 scope='fc1_combined') # (N,num_hidden)
-                #net = slim.batch_norm(net,is_training = self.is_training)
-                #net = slim.fully_connected(net,self.num_hidden,scope='fc2_combined') # (N,num_hidden)
-                #net = slim.batch_norm(net,is_training = self.is_training)
                 net = slim.fully_connected(net,1,activation_fn=None,scope='net')
             
             with tf.name_scope("action_gradient"):
@@ -64,7 +60,7 @@ class Critic:
             critic_loss = tf.reduce_mean(tf.square(qtarget-q_pred))
         return critic_loss
              
-    def optimizer(self,loss,learning_rate=1e-5):
+    def optimizer(self,loss,learning_rate=1e-3):
         with tf.name_scope('critic_optimizer'):
             train_op = tf.train.AdamOptimizer(learning_rate).minimize(loss)
         return train_op
