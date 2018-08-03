@@ -6,7 +6,7 @@ import time
 class Critic:
     """Critic (Value) Model."""
 
-    def __init__(self, state_size, action_size,hidden_size=64,is_training=True):
+    def __init__(self, state_size, action_size,hidden_size=128,is_training=True):
         """Initialize parameters and build model.
 
         Params
@@ -32,22 +32,27 @@ class Critic:
         with tf.variable_scope(scope):
             batch_norm_params = {'is_training': self.is_training}
             with tf.variable_scope("state"):
-                net_states = slim.fully_connected(inp_state,self.num_hidden,weights_regularizer=slim.l2_regularizer(1e-3),
+                net_states = slim.fully_connected(inp_state,self.num_hidden,weights_regularizer=slim.l2_regularizer(0.0),
                             normalizer_fn=slim.batch_norm,normalizer_params = batch_norm_params,scope='fc1') # (N,num_hidden)
-                net_states = slim.fully_connected(inp_state,self.num_hidden,weights_regularizer=slim.l2_regularizer(1e-3),
+                net_states = slim.dropout(net_states,keep_prob=.5,is_training=self.is_training)
+                net_states = slim.fully_connected(inp_state,self.num_hidden,weights_regularizer=slim.l2_regularizer(0.0),
                             normalizer_fn=slim.batch_norm,normalizer_params = batch_norm_params,scope='fc2') # (N,num_hidden)
-                
+                net_states = slim.dropout(net_states,keep_prob=.5,is_training=self.is_training)
             
             with tf.variable_scope("action"):
-                net_actions = slim.fully_connected(actions,self.num_hidden,normalizer_fn=slim.batch_norm,weights_regularizer=slim.l2_regularizer(1e-3),
+                net_actions = slim.fully_connected(actions,self.num_hidden,normalizer_fn=slim.batch_norm,weights_regularizer=slim.l2_regularizer(0.0),
                                             normalizer_params = batch_norm_params,scope='fc1') # (N,num_hidden)
-                net_actions = slim.fully_connected(actions,self.num_hidden,normalizer_fn=slim.batch_norm,weights_regularizer=slim.l2_regularizer(1e-3),
+                net_actions = slim.dropout(net_actions,keep_prob=.5,is_training=self.is_training)
+                net_actions = slim.fully_connected(actions,self.num_hidden,normalizer_fn=slim.batch_norm,weights_regularizer=slim.l2_regularizer(0.0),
                                             normalizer_params = batch_norm_params,scope='fc2') # (N,num_hidden)
+                net_actions = slim.dropout(net_actions,keep_prob=.5,is_training=self.is_training)
             
             with tf.name_scope("combined"):
                 net = tf.add(net_states,net_actions)
                 net = slim.fully_connected(net,self.num_hidden,normalizer_fn=slim.batch_norm,normalizer_params = batch_norm_params,
-                                                weights_regularizer=slim.l2_regularizer(1e-3),scope='fc1_combined') # (N,num_hidden)
+                                                weights_regularizer=slim.l2_regularizer(0.0),scope='fc1_combined') # (N,num_hidden)
+                net = slim.dropout(net,keep_prob=.5,is_training=self.is_training)
+
                 net = slim.fully_connected(net,1,activation_fn=None,scope='net')
             
             with tf.name_scope("action_gradient"):

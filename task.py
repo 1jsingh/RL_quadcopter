@@ -30,8 +30,8 @@ class Task():
         """Uses current pose of sim to return reward."""
         penalty = 0
         if done and self.t < 240:
-            penalty = -10
-        reward =  2 - .03*(abs(self.sim.pose[:3] - self.target_pos)).sum() #- .001*(np.square(self.sim.pose[3:])).sum()
+            penalty =  0
+        reward =  penalty + 1 - 0.01*(np.linalg.norm(self.sim.pose[:3] - self.target_pos)) #- .001*(np.square(self.sim.pose[3:])).sum()
                     #- .005*(abs(self.sim.v)).sum() 
                      #   - .005*(abs(self.sim.pose[3:])).sum()
                     #- \

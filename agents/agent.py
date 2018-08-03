@@ -11,7 +11,7 @@ from agents.utils import *
 
 class DDPG():
     """Reinforcement Learning agent that learns using DDPG."""
-    def __init__(self, task, single_rotor_control = False):
+    def __init__(self, task, single_rotor_control = False,prioritised_replay = False):
         tf.reset_default_graph()
         
         self.task = task
@@ -20,6 +20,7 @@ class DDPG():
         self.action_low = self.task.action_low
         self.action_high = self.task.action_high
         self.action_range = self.action_high - self.action_low
+        self.prioritised_replay = prioritised_replay
 
         with tf.variable_scope("local"):
             self.actor_local = Actor(self.state_size, self.action_size, self.action_low, self.action_high , single_rotor_control,is_training=False)
@@ -64,15 +65,41 @@ class DDPG():
         self.last_state = state
         return state
 
+
+    def get_td_error(self,sess,action, reward, next_state, done):
+
+        state = np.reshape(self.last_state,[1,-1])
+        action = np.reshape(action,[1,-1])
+        reward = np.reshape(reward,[1,-1])
+        next_state = np.reshape(next_state,[1,-1])
+        done = np.reshape(done,[1,-1])
+        action_next = sess.run(self.actor_local.actions,feed_dict={self.actor_local.inp_state:next_state})
+        Q_value_next = sess.run(self.critic_local.q_pred,feed_dict={self.critic_local.inp_state:next_state
+                                                                     ,self.critic_local.actions:action_next})
+
+        # Compute Q targets for current states and train critic model (local)
+        Q_target = reward + self.gamma * Q_value_next * (1 - done)
+
+        Q_pred = sess.run(self.critic_local.q_pred,feed_dict={self.critic_local.inp_state:state
+                                                                     ,self.critic_local.actions:action})
+        delta = abs(Q_target - Q_pred)
+        return np.float(delta)
+
     def step(self, sess,action, reward, next_state, done):
         
         # next_state = next_state/100.
         # Save experience / reward
-        self.memory.add(self.last_state, action, reward, next_state, done)
+
+        if self.prioritised_replay:
+            delta = self.get_td_error(sess,action, reward, next_state, done)
+        else:
+            delta = None
+        
+        self.memory.add(self.last_state, action, reward, next_state, done, delta)
 
         # Learn, if enough samples are available in memory
         if len(self.memory) > self.batch_size:
-            experiences = self.memory.sample()
+            experiences = self.memory.sample(prioritised_replay=self.prioritised_replay)
             self.learn(sess,experiences)
 
         # Roll over last state and action
@@ -83,7 +110,7 @@ class DDPG():
         state = np.reshape(state, [-1, self.state_size])
         action = sess.run(self.actor_local.actions,feed_dict={self.actor_local.inp_state:state})
         #return list(action + self.noise.sample())  # add some noise for exploration
-        return np.clip((action[0] + self.noise.sample()),self.action_low,self.action_high)
+        return np.clip((action[0] + self.noise.sample()[0]),self.action_low,self.action_high)
         
     def learn(self, sess,experiences):
         """Update policy and value parameters using given batch of experience tuples."""

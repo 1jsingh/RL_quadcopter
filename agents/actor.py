@@ -7,7 +7,7 @@ import time
 class Actor:
     """Actor (Policy) Model."""
 
-    def __init__(self, state_size, action_size, action_low, action_high,single_rotor_control = False,hidden_size=64,
+    def __init__(self, state_size, action_size, action_low, action_high,single_rotor_control = False,hidden_size=128,
                     is_training=True):
         """Initialize parameters for the actor.
 
@@ -42,13 +42,15 @@ class Actor:
         with tf.variable_scope(scope):
             batch_norm_params = {'is_training': self.is_training}
             net = slim.fully_connected(inp_state,self.num_hidden,normalizer_fn=slim.batch_norm,normalizer_params = batch_norm_params,
-                                weights_regularizer=slim.l2_regularizer(1e-3),scope='fc1') # (N,num_hidden)
+                                weights_regularizer=slim.l2_regularizer(0.0),scope='fc1') # (N,num_hidden)
+            net = slim.dropout(net,keep_prob=.1,is_training=self.is_training)
             #net = slim.batch_norm(net,is_training=self.is_training)
             net = slim.fully_connected(net,self.num_hidden,#normalizer_fn=slim.batch_norm,normalizer_params = batch_norm_params,
-                                weights_regularizer=slim.l2_regularizer(1e-3),scope='fc2') # (N,num_hidden)
-
+                                weights_regularizer=slim.l2_regularizer(0.0),scope='fc2') # (N,num_hidden)
+            net = slim.dropout(net,keep_prob=.1,is_training=self.is_training)
             net = slim.fully_connected(net,self.num_hidden,normalizer_fn=slim.batch_norm,normalizer_params = batch_norm_params,
-                               weights_regularizer=slim.l2_regularizer(1e-3),scope='fc3') # (N,num_hidden)
+                               weights_regularizer=slim.l2_regularizer(0.0),scope='fc3') # (N,num_hidden)
+            net = slim.dropout(net,keep_prob=.1,is_training=self.is_training)
             #net = slim.batch_norm(net,is_training=self.is_training)
             if self.single_rotor_control:
                 net = slim.fully_connected(net,1,activation_fn=tf.sigmoid,scope='fc4') # (N,1)
