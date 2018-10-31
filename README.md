@@ -38,7 +38,7 @@ for my reward function , penalty = -10 if episode ends before 240 timesteps.
 
 * However I later found out that the penalty is not required if the agent is mostly rewarded positively for not going out of bounds. So for my specific initial and target position pair , the following reward function worked the best for me.
 
-*Final Reward function = 1.0 - .01 * (L2 norm of the difference between target pos and current pos)*
+***Final Reward function = 1.0 - .01 * (L2 norm of the difference between target pos and current pos)***
 
 
 **Question 2**: Discuss your agent briefly, using the following questions as a guide:
@@ -89,8 +89,8 @@ for my reward function , penalty = -10 if episode ends before 240 timesteps.
 
 * My first intuition was that it should be an easy task , however as it turns out the stability issues of the quad make it into a 2 fold task : to stay afloat , and rise up to the target position.
 
-* Even if we consider the stability problem to be solved : using single rotor control (same speed and noise for all rotors) , in order to effectively solve the task the agent has to learn to rise with high acceleration and then drop rotor speeds to deaccelerate to maximise reward. However the agent seemed to be struggling to learn this trick in reasonable episodes(though it learnt to rise to the target position fairly quickly). You can try single rotor control by : 
-`rl_agent = DDPG(task,single_rotor_control=True , prioritised_replay=True)`
+* Even if we consider the stability problem to be solved : using single rotor control (same speed and noise for all rotors) , in order to effectively solve the task the agent has to learn to rise with high acceleration and then drop rotor speeds to deaccelerate to maximise reward. However the agent seemed to be struggling to learn this trick in reasonable episodes(though it learnt to rise to the target position fairly quickly). **You can try single rotor control by : 
+`rl_agent = DDPG(task,single_rotor_control=True , prioritised_replay=True)`**
 
 * It was an aha moment. However the trend was observed in most of my experiments including the **Pendulum-v0** gym environment. The reason for this is unclear to me yet. However , as is clear from the visualisations of the training code the agent sometimes goes to-fro between policies before suddenly getting on to the optimum policy. Such behaviour is understandable but I expected it to be more gradual.
 
