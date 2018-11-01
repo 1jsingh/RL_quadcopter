@@ -34,6 +34,7 @@ Though the rewards should ideally be visualised using tensorboard (see the train
 
 
 *Possible Reward function = penalty + 1.0 - .03 * (L2 norm of the difference between target pos and current pos)*
+
 for my reward function , penalty = -10 if episode ends before 240 timesteps.
 
 * However I later found out that the penalty is not required if the agent is mostly rewarded positively for not going out of bounds. So for my specific initial and target position pair , the following reward function worked the best for me.
