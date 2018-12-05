@@ -20,9 +20,7 @@ Though the rewards should ideally be visualised using tensorboard (see the train
 
 ## Reflections
 
-**Question 1**: Describe the task that you specified in `task.py`.  How did you design the reward function?
-
-**Answer**: 
+### Designing task and the reward function
 
 * The agent is being trained for a takeoff task, which means the agent has to learn to fly above from its starting position to reach a target position. 
 
@@ -42,13 +40,7 @@ for my reward function , penalty = -10 if episode ends before 240 timesteps.
 ***Final Reward function = 1.0 - .01 * (L2 norm of the difference between target pos and current pos)***
 
 
-**Question 2**: Discuss your agent briefly, using the following questions as a guide:
-
-- What learning algorithm(s) did you try? What worked best for you?
-- What was your final choice of hyperparameters (such as $\alpha$, $\gamma$, $\epsilon$, etc.)?
-- What neural network architecture did you use (if any)? Specify layers, sizes, activation functions, etc.
-
-**Answer**: 
+### Learning Algorithm, Network Architecture and choice of hyperparameters
 
 * The agent is based on the Deep Deterministic Policy Gradients(DDPG) model with a **prioritised experience replay**.It has an actor model which learns the policy used to decide which action to take based on the input state , and a critic model that evaluates the policy learnt by the actor model.
 
@@ -80,13 +72,8 @@ for my reward function , penalty = -10 if episode ends before 240 timesteps.
 
 * However the most important part was to realise the need of **prioritised experience replay**. The need for prioritised experience replay increases many folds specially in tasks like these , where the exploration of high reward policies might be restricted by the stability issues of the agent.
 
-**Question 3**: Using the episode rewards plot, discuss how the agent learned over time.
 
-- Was it an easy task to learn or hard?
-- Was there a gradual learning curve, or an aha moment?
-- How good was the final performance of the agent? (e.g. mean rewards over the last 10 episodes)
-
-**Answer**: 
+### Comments on the learning curve
 
 * My first intuition was that it should be an easy task , however as it turns out the stability issues of the quad make it into a 2 fold task : to stay afloat , and rise up to the target position.
 
@@ -97,12 +84,7 @@ for my reward function , penalty = -10 if episode ends before 240 timesteps.
 
 * The final performance is OK , with reward of ~ 150
 
-**Question 4**: Briefly summarize your experience working on this project. You can use the following prompts for ideas.
-
-- What was the hardest part of the project? (e.g. getting started, plotting, specifying the task, etc.)
-- Did you find anything interesting in how the quadcopter or your agent behaved?
-
-**Answer**: 
+### Difficulties faced and final agent behaviour
 
 * The hardest part was tuning the reward function to prevent it from falling down , adding penalties and so on.
 * The quad somehow learns that it is best to almost turn off two diagonally opposite rotors , while giving thrust for
