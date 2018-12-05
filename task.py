@@ -32,10 +32,10 @@ class Task():
         if done and self.t < 240:
             penalty =  0
         reward =  penalty + 1 - 0.01*(np.linalg.norm(self.sim.pose[:3] - self.target_pos)) #- .001*(np.square(self.sim.pose[3:])).sum()
+        #alt_reward =  penalty + 1 - 0.01*(np.linalg.norm(self.sim.pose[:3] - self.target_pos)) - .001*(np.square(self.sim.pose[3:])).sum()
                     #- .005*(abs(self.sim.v)).sum() 
-                     #   - .005*(abs(self.sim.pose[3:])).sum()
-                    #- \
-                    #.3*(abs(self.sim.angular_v)).sum() - .3*(abs(self.sim.pose[3:])).sum() -.01*(abs(self.sim.angular_v)).sum()
+                    #- .005*(abs(self.sim.pose[3:])).sum()
+                    #- .3*(abs(self.sim.angular_v)).sum() - .3*(abs(self.sim.pose[3:])).sum() -.01*(abs(self.sim.angular_v)).sum()
         return reward
 
     def step(self, rotor_speeds):
