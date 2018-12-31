@@ -80,7 +80,7 @@ for my reward function , penalty = -10 if episode ends before 240 timesteps.
 * Even if we consider the stability problem to be solved : using single rotor control (same speed and noise for all rotors) , in order to effectively solve the task the agent has to learn to rise with high acceleration and then drop rotor speeds to deaccelerate to maximise reward. However the agent seemed to be struggling to learn this trick in reasonable episodes(though it learnt to rise to the target position fairly quickly). **You can try single rotor control by : 
 `rl_agent = DDPG(task,single_rotor_control=True , prioritised_replay=True)`**
 
-* It was an aha moment. However the trend was observed in most of my experiments including the **Pendulum-v0** gym environment. The reason for this is unclear to me yet. However , as is clear from the visualisations of the training code the agent sometimes goes to-fro between policies before suddenly getting on to the optimum policy. Such behaviour is understandable but I expected it to be more gradual.
+* The learning curve is characterized by an aha moment. However the trend was observed in most of my experiments including the **Pendulum-v0** gym environment. The reason for this is unclear to me yet. However , as is clear from the visualisations of the training code the agent sometimes goes to-fro between policies before suddenly getting on to the optimum policy. Such behaviour is understandable but I expected it to be more gradual.
 
 * The final performance is OK , with reward of ~ 150
 
