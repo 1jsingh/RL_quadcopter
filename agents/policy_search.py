@@ -1,5 +1,4 @@
 import numpy as np
-from task import Task
 
 class PolicySearch_Agent():
     def __init__(self, task):
@@ -41,7 +40,7 @@ class PolicySearch_Agent():
     def act(self, state):
         # Choose action based on given state and policy
         action = np.dot(state, self.w)  # simple linear policy
-        return action
+        return np.clip(action,self.action_low,self.action_high)
 
     def learn(self):
         # Learn by random policy search, using a reward-based score
