@@ -1,2 +1,5 @@
-tensorboard
-*.sh
+#Jupyter notebook
+.ipynb_checkpoints
+
+#python
+*/__pycache__
