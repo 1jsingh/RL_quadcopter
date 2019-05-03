@@ -124,7 +124,7 @@ Thus the overall time complexity for optimized implementation of PER: **O(log(n)
 * **Reward Curve**  
     <img src='images/reward_curve-single_rotor.png' alt='reward_curve-single_rotor'>
 * **Quadcopter movement visualization**  
-    <img src='images/quadcopter_movement-single_rotor.png' alt='quadcopter_movement-single_rotor'>
+    <img src='images/quad_movement-single_rotor.png' alt='quad_movement-single_rotor'>
 
 ### Multi rotor mode
 
@@ -136,7 +136,7 @@ Thus the overall time complexity for optimized implementation of PER: **O(log(n)
 * **Reward Curve**  
     <img src='images/reward_curve-multi_rotor.png' alt='reward_curve-multi_rotor'>
 * **Quadcopter movement visualization**  
-    <img src='images/quadcopter_movement-multi_rotor.png' alt='quadcopter_movement-multi_rotor'>  
+    <img src='images/quad_movement-multi_rotor.png' alt='quad_movement-multi_rotor'>  
 
     **Note that the multi-rotor quadcopter agent does not perform as well as the single rotor agent**
 
