@@ -60,6 +60,7 @@ class PhysicsSim():
         self.angular_accels = np.array([0.0, 0.0, 0.0])
         self.prop_wind_speed = np.array([0., 0., 0., 0.])
         self.done = False
+        self.in_bounds = True
 
     def find_body_velocity(self):
         body_velocity = np.matmul(earth_to_body_frame(*list(self.pose[3:])), self.v)
@@ -137,11 +138,11 @@ class PhysicsSim():
             if position[ii] <= self.lower_bounds[ii]:
                 new_positions.append(self.lower_bounds[ii])
                 self.done = True
-                #print ("hit lower bound" , self.lower_bounds[ii])
+                self.in_bounds = False
             elif position[ii] > self.upper_bounds[ii]:
                 new_positions.append(self.upper_bounds[ii])
                 self.done = True
-                #print ("hit upper bound" , self.upper_bounds[ii])
+                self.in_bounds = False
             else:
                 new_positions.append(position[ii])
 
